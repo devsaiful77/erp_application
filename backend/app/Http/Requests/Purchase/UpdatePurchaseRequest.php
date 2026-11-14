@@ -53,7 +53,7 @@ class UpdatePurchaseRequest extends FormRequest
             'items.*.item_name' => ['required_without:items.*.product_id', 'nullable', 'string', 'max:255'],
             'items.*.description' => ['nullable', 'string', 'max:255'],
             'items.*.qty' => ['required', 'numeric', 'min:0.01'],
-            'items.*.unit' => ['nullable', 'string', 'max:50'],
+            'items.*.unit_id' => ['nullable', 'integer', Rule::exists('inventory_units', 'id')],
             'items.*.unit_price' => ['required', 'numeric', 'min:0'],
             'items.*.discount' => ['nullable', 'numeric', 'min:0'],
             'items.*.vat' => ['nullable', 'numeric', 'min:0'],

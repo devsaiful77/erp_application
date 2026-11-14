@@ -33,7 +33,7 @@ class PurchaseService
 
     public function find(Purchase $purchase): Purchase
     {
-        return $purchase->load(['items', 'supplier', 'workOrder', 'purchasedBy']);
+        return $purchase->load(['items.unit', 'supplier', 'workOrder', 'purchasedBy']);
     }
 
     /**
@@ -45,7 +45,7 @@ class PurchaseService
      * product purchase and Purchase for a service one, the credit to
      * Accounts Payable.
      *
-     * @param  array{supplier_id: int, work_order_id?: ?int, purchased_by_id?: ?int, purchase_type: string, invoice_number: string, description?: ?string, issue_date: string, purchase_date: string, notes?: ?string, debit_account_id?: ?int, credit_account_id?: ?int, overall_discount?: ?float, overall_vat?: ?float, attachment?: ?UploadedFile, items: array<int, array{item_name: string, description?: ?string, qty: float, unit?: ?string, unit_price: float, discount?: ?float, vat?: ?float}>}  $data
+     * @param  array{supplier_id: int, work_order_id?: ?int, purchased_by_id?: ?int, purchase_type: string, invoice_number: string, description?: ?string, issue_date: string, purchase_date: string, notes?: ?string, debit_account_id?: ?int, credit_account_id?: ?int, overall_discount?: ?float, overall_vat?: ?float, attachment?: ?UploadedFile, items: array<int, array{item_name: string, description?: ?string, qty: float, unit_id?: ?int, unit_price: float, discount?: ?float, vat?: ?float}>}  $data
      */
     public function create(array $data): Purchase
     {
@@ -91,7 +91,7 @@ class PurchaseService
 
             $purchase->update(['supplier_transaction_id' => $transaction->id]);
 
-            return $purchase->load(['items', 'supplier', 'workOrder', 'purchasedBy']);
+            return $purchase->load(['items.unit', 'supplier', 'workOrder', 'purchasedBy']);
         });
     }
 
@@ -155,7 +155,7 @@ class PurchaseService
                 ]);
             }
 
-            return $purchase->load(['items', 'supplier', 'workOrder', 'purchasedBy']);
+            return $purchase->load(['items.unit', 'supplier', 'workOrder', 'purchasedBy']);
         });
     }
 

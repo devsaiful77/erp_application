@@ -4,6 +4,7 @@ use App\Models\AccountTransaction;
 use App\Models\ChartOfAccount;
 use App\Models\Customer;
 use App\Models\CustomerTransaction;
+use App\Models\InventoryUnit;
 use App\Models\Product;
 use App\Models\Sale;
 use Database\Seeders\ChartOfAccountSeeder;
@@ -458,20 +459,23 @@ describe('units and overall discount/VAT', function () {
     it('stores line units and adds the overall discount and VAT to the totals', function () {
         $actor = adminUser();
         $customer = Customer::factory()->create();
+        $hour = InventoryUnit::factory()->create(['short_name' => 'hr']);
+        $day = InventoryUnit::factory()->create(['short_name' => 'day']);
 
         // Lines: 90 gross, 5 discount, 3 VAT. Overall: -10 discount, +4 VAT.
         $response = $this->actingAs($actor, 'sanctum')
             ->postJson('/api/sales', salePayload($customer->id, [
                 'items' => [
-                    ['item_name' => 'Consulting', 'qty' => 10, 'unit' => 'Hour', 'unit_price' => 5],
-                    ['item_name' => 'Support', 'qty' => 20, 'unit' => 'Day', 'unit_price' => 2, 'discount' => 5, 'vat' => 3],
+                    ['item_name' => 'Consulting', 'qty' => 10, 'unit_id' => $hour->id, 'unit_price' => 5],
+                    ['item_name' => 'Support', 'qty' => 20, 'unit_id' => $day->id, 'unit_price' => 2, 'discount' => 5, 'vat' => 3],
                 ],
                 'overall_discount' => 10,
                 'overall_vat' => 4,
             ]));
 
         $response->assertStatus(201)
-            ->assertJsonPath('data.items.1.unit', 'Day')
+            ->assertJsonPath('data.items.1.unit_id', $day->id)
+            ->assertJsonPath('data.items.1.unit', 'day')
             ->assertJsonPath('data.overall_discount', 10)
             ->assertJsonPath('data.overall_vat', 4)
             ->assertJsonPath('data.discount_amount', 15)

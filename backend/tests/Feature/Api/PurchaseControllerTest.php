@@ -3,6 +3,7 @@
 use App\Models\AccountTransaction;
 use App\Models\ChartOfAccount;
 use App\Models\Employee;
+use App\Models\InventoryUnit;
 use App\Models\Product;
 use App\Models\Purchase;
 use App\Models\Supplier;
@@ -505,13 +506,15 @@ describe('units, overall discount/VAT and purchased by', function () {
         $actor = adminUser();
         $supplier = Supplier::factory()->create(['opening_balance' => 0]);
         $buyer = Employee::factory()->create();
+        $ream = InventoryUnit::factory()->create(['short_name' => 'rm']);
+        $pcs = InventoryUnit::factory()->create(['short_name' => 'pcs']);
 
         // Lines: 90 gross, 5 discount, 3 VAT (see the totals test). Overall: -8 discount, +10 VAT.
         $response = $this->actingAs($actor, 'sanctum')
             ->postJson('/api/purchases', purchasePayload($supplier->id, [
                 'items' => [
-                    ['item_name' => 'Paper', 'qty' => 10, 'unit' => 'Ream', 'unit_price' => 5],
-                    ['item_name' => 'Pens', 'qty' => 20, 'unit' => 'Pcs', 'unit_price' => 2, 'discount' => 5, 'vat' => 3],
+                    ['item_name' => 'Paper', 'qty' => 10, 'unit_id' => $ream->id, 'unit_price' => 5],
+                    ['item_name' => 'Pens', 'qty' => 20, 'unit_id' => $pcs->id, 'unit_price' => 2, 'discount' => 5, 'vat' => 3],
                 ],
                 'overall_discount' => 8,
                 'overall_vat' => 10,
@@ -519,7 +522,8 @@ describe('units, overall discount/VAT and purchased by', function () {
             ]));
 
         $response->assertStatus(201)
-            ->assertJsonPath('data.items.0.unit', 'Ream')
+            ->assertJsonPath('data.items.0.unit_id', $ream->id)
+            ->assertJsonPath('data.items.0.unit', 'rm')
             ->assertJsonPath('data.overall_discount', 8)
             ->assertJsonPath('data.overall_vat', 10)
             ->assertJsonPath('data.discount_amount', 13)

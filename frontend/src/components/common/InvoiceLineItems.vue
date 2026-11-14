@@ -31,8 +31,13 @@
                     <td><input type="text" class="form-control" v-model="item.item_name" required /></td>
                     <td><input type="text" class="form-control" v-model="item.description" /></td>
                     <td><input type="number" min="0.01" step="0.01" class="form-control" v-model.number="item.qty" required /></td>
-                    <!-- Pick a unit from the list or type one; the name is stored on the line. -->
-                    <td><input type="text" class="form-control" v-model="item.unit" :list="unitListId" maxlength="50" /></td>
+                    <td>
+                        <select class="form-control" v-model="item.unit_id">
+                            <option value="">{{ $t('Select Unit') }}</option>
+                            <option v-for="unit in units" :key="unit.id" :value="unit.id">{{ unit.short_name }}</option>
+                        </select>
+                        <div v-if="errors[`items.${index}.unit_id`]" class="error-msg">{{ errors[`items.${index}.unit_id`] }}</div>
+                    </td>
                     <td><input type="number" min="0" step="0.01" class="form-control" v-model.number="item.unit_price" required /></td>
                     <td><input type="number" min="0" step="0.01" class="form-control" v-model.number="item.discount" /></td>
                     <td><input type="number" min="0" step="0.01" class="form-control" v-model.number="item.vat" /></td>
@@ -46,9 +51,6 @@
                 </tr>
             </tbody>
         </table>
-        <datalist :id="unitListId">
-            <option v-for="unit in units" :key="unit.id" :value="unit.name">{{ unit.short_name }}</option>
-        </datalist>
     </div>
 
     <v-btn type="button" class="text-none mb-3" color="grey-lighten-3" rounded="0" variant="flat" @click="addItem">
@@ -121,7 +123,6 @@ const props = defineProps({
     note: { type: String, default: '' },
 })
 
-const unitListId = `invoice-units-${Math.random().toString(36).slice(2)}`
 const units = ref([])
 
 // Picking a product fills in its name, which is stored on the line as a snapshot.
@@ -165,14 +166,14 @@ onMounted(async () => {
         const { data } = await axios.get('/api/asset/units/options')
         if (data.success) units.value = data.data
     } catch {
-        // Without the list the unit is still a free-text field.
+        // Without the list the unit is simply left unselected.
     }
 })
 </script>
 
 <script>
 /** A blank line for the form. */
-export const emptyInvoiceItem = () => ({ product_id: '', item_name: '', description: '', qty: 1, unit: '', unit_price: 0, discount: 0, vat: 0 })
+export const emptyInvoiceItem = () => ({ product_id: '', item_name: '', description: '', qty: 1, unit_id: '', unit_price: 0, discount: 0, vat: 0 })
 
 /** An API line item mapped back onto the form's fields. */
 export const toInvoiceFormItem = (item) => ({
@@ -180,7 +181,7 @@ export const toInvoiceFormItem = (item) => ({
     item_name: item.item_name,
     description: item.description,
     qty: item.qty,
-    unit: item.unit ?? '',
+    unit_id: item.unit_id ?? '',
     unit_price: item.unit_price,
     discount: item.discount,
     vat: item.vat,

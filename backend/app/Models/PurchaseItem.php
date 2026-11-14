@@ -52,4 +52,9 @@ class PurchaseItem extends Model
     {
         return $this->belongsTo(Product::class)->withTrashed();
     }
+
+    public function unit(): BelongsTo
+    {
+        return $this->belongsTo(InventoryUnit::class, 'unit_id');
+    }
 }

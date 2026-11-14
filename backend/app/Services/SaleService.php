@@ -34,7 +34,7 @@ class SaleService
 
     public function find(Sale $sale): Sale
     {
-        return $sale->load(['items', 'customer', 'workOrder']);
+        return $sale->load(['items.unit', 'customer', 'workOrder']);
     }
 
     /**
@@ -45,7 +45,7 @@ class SaleService
      * accounts can be chosen; they default to Accounts Receivable and Sales
      * Revenue.
      *
-     * @param  array{customer_id: int, work_order_id?: ?int, invoice_number: string, description?: ?string, issue_date: string, due_date?: ?string, notes?: ?string, debit_account_id?: ?int, credit_account_id?: ?int, overall_discount?: ?float, overall_vat?: ?float, previous_advance_amount?: ?float, previous_advance_purpose?: ?string, attachment?: ?UploadedFile, items: array<int, array{item_name: string, description?: ?string, qty: float, unit?: ?string, unit_price: float, discount?: ?float, vat?: ?float}>}  $data
+     * @param  array{customer_id: int, work_order_id?: ?int, invoice_number: string, description?: ?string, issue_date: string, due_date?: ?string, notes?: ?string, debit_account_id?: ?int, credit_account_id?: ?int, overall_discount?: ?float, overall_vat?: ?float, previous_advance_amount?: ?float, previous_advance_purpose?: ?string, attachment?: ?UploadedFile, items: array<int, array{item_name: string, description?: ?string, qty: float, unit_id?: ?int, unit_price: float, discount?: ?float, vat?: ?float}>}  $data
      */
     public function create(array $data): Sale
     {
@@ -93,7 +93,7 @@ class SaleService
 
             $sale->update(['customer_transaction_id' => $transaction->id]);
 
-            return $sale->load(['items', 'customer', 'workOrder']);
+            return $sale->load(['items.unit', 'customer', 'workOrder']);
         });
     }
 
@@ -171,7 +171,7 @@ class SaleService
                 ]);
             }
 
-            return $sale->load(['items', 'customer', 'workOrder']);
+            return $sale->load(['items.unit', 'customer', 'workOrder']);
         });
     }
 
@@ -277,7 +277,7 @@ class SaleService
                 'notes' => $data['notes'] ?? null,
             ]);
 
-            return $sale->load(['items', 'customer', 'workOrder']);
+            return $sale->load(['items.unit', 'customer', 'workOrder']);
         });
     }
 
